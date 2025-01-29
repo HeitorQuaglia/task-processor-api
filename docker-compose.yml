@@ -1,28 +1,32 @@
 services:
-  app:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: fastapi_app
-    ports:
-      - "8000:8000"
-    environment:
-      - MONGO_URL=mongodb://mongo:27017
-      - RABBITMQ_URL=amqp://rabbitmq:5672
-      - S3_ENDPOINT=http://localstack:4566
-      - AWS_REGION=${AWS_REGION}
-      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
-      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
-    depends_on:
-      mongo:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      localstack:
-        condition: service_healthy
+#  app:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    container_name: fastapi_app
+#    ports:
+#      - "8000:8000"
+#    environment:
+#      - MONGO_URL=mongodb://mongo:27017
+#      - RABBITMQ_URL=amqp://guest:guest@rabbitmq:5672/
+#      - S3_ENDPOINT=http://localstack:4566
+#      - AWS_REGION=${AWS_REGION}
+#      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+#      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+#      - CELERY_BACKEND_URL=redis://redis:6379/0
+#    depends_on:
+#      mongo:
+#        condition: service_healthy
+#      rabbitmq:
+#        condition: service_healthy
+#      localstack:
+#        condition: service_healthy
+#      redis:
+#        condition: service_healthy
+#
+#    networks:
+#      - app-network
 
-    networks:
-      - app-network
   mongo:
     image: mongo:latest
     container_name: mongo
@@ -70,6 +74,7 @@ services:
       - AWS_REGION=${AWS_REGION}
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - PERSISTENCE=1
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "localstack-data:/var/lib/localstack"
@@ -80,6 +85,19 @@ services:
       retries: 12
     networks:
       - app-network
+
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+    healthcheck:
+        test: ["CMD", "redis-cli", "ping"]
+        interval: 10s
+        timeout: 5s
+        retries: 5
+
 volumes:
   mongo-data:
   localstack-data:

@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import data_router
+from .routers import process_data
+
 
 def create_app() -> FastAPI:
     app = FastAPI()
@@ -13,6 +14,6 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
 
-    app.include_router(data_router.router)
+    app.include_router(process_data.router)
 
     return app
