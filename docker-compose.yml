@@ -14,9 +14,13 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     depends_on:
-      - mongo
-      - rabbitmq
-      - localstack
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+
     networks:
       - app-network
   mongo:
@@ -32,6 +36,11 @@ services:
       - mongo-data:/data/db
     networks:
       - app-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh mongodb://localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   rabbitmq:
     image: "rabbitmq:management"
@@ -44,6 +53,11 @@ services:
       - RABBITMQ_DEFAULT_PASS=guest
     networks:
       - app-network
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   localstack:
     image: localstack/localstack
@@ -58,7 +72,7 @@ services:
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
-      - "localstack-data:/tmp/localstack"
+      - "localstack-data:/var/lib/localstack"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:4566" ]
       interval: 5s
