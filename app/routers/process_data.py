@@ -23,4 +23,4 @@ async def get_task_result(task_id: str):
         raise HTTPException(status_code=404, detail="Task não encontrada")
 
     # Retorna os dados da task
-    return {"task_id": task.task_id, "status": task.status, "result": task.result, "comment": task.comment}
+    return task

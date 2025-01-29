@@ -17,7 +17,7 @@ class TaskResult(BaseModel):
     status: Literal["processing", "error", "completed"] = Field(..., description="Status da tarefa")
     result: Optional[float | str] = Field(None, description="Resultado numérico (para CSV) ou string (para URL)")
     comment: Optional[str] = Field(None, description="Comentário detalhado sobre o resultado")
-    task_data: Union[UrlTaskData, CsvTaskData] = Field(..., description="Dados específicos da tarefa")
+    task_metadata: Union[UrlTaskData, CsvTaskData] = Field(..., description="Dados específicos da tarefa")
 
     class Config:
         orm_mode = True
