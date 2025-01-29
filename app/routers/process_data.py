@@ -17,7 +17,8 @@ async def process_data(
     try:
         payload = ProcessDataInput(url=url, column=column)
     except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e.args[0]))
+        error_message = e.errors()[0]["msg"]
+        raise HTTPException(status_code=400, detail=error_message)
     return await ProcessorService.process_data(background_tasks, payload, file)
 
 @router.get("/results/{task_id}")
