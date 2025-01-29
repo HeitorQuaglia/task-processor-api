@@ -29,7 +29,7 @@ class ProcessorService:
                 status="processing",
                 result=None,
                 comment="Processando CSV...",
-                task_data=CsvTaskData(file_url=file_url, column_name=payload.column)
+                task_metadata=CsvTaskData(file_url=file_url, column_name=payload.column)
             )
 
             response["file_url"] = file_url
@@ -43,7 +43,7 @@ class ProcessorService:
                 status="processing",
                 result=None,
                 comment="Validando URL...",
-                task_data=UrlTaskData(url=payload.url)
+                task_metadata=UrlTaskData(url=payload.url)
             )
 
             response["url"] = payload.url

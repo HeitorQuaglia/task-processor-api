@@ -9,14 +9,14 @@ class MongoDB:
     @classmethod
     def get_client(cls) -> AsyncIOMotorClient:
         if cls._client is None:
-            mongo_url = os.getenv("MONGO_URL", "mongodb://localhost:27017/db_app")
+            mongo_url = os.getenv("MONGO_URL")
             cls._client = AsyncIOMotorClient(mongo_url)
         return cls._client
 
     @classmethod
     def get_database(cls):
         if cls._db is None:
-            cls._db = cls.get_client()[os.getenv("MONGO_DB_NAME", "db_app")]
+            cls._db = cls.get_client()[os.getenv("MONGO_DB_NAME")]
         return cls._db
 
 

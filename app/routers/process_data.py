@@ -15,7 +15,7 @@ async def process_data(
     file: UploadFile = File(None),
 ):
     try:
-        payload = ProcessDataInput(url=url, column=column)
+        payload = ProcessDataInput(url=url, column=column, file=file)
     except ValueError as e:
         error_message = e.errors()[0]["msg"]
         raise HTTPException(status_code=400, detail=error_message)
@@ -26,11 +26,9 @@ async def get_task_result(task_id: str):
     """
     Consulta o status de uma tarefa pelo ID.
     """
-    # Recupera a task pelo ID
     task = await MongoService.get_task(task_id)
 
     if not task:
         raise HTTPException(status_code=404, detail="Task não encontrada")
 
-    # Retorna os dados da task
     return task

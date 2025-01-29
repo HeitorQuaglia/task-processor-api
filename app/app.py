@@ -5,7 +5,6 @@ from .routers import process_data
 
 def create_app() -> FastAPI:
     app = FastAPI()
-
     app.add_middleware(
         CORSMiddleware,
         allow_origins=["*"],
