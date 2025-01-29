@@ -29,13 +29,13 @@ class ProcessorService:
                 status="processing",
                 result=None,
                 comment="Processando CSV...",
-                task_data=CsvTaskData(file_url=file_url, column_name=payload.column_name)
+                task_data=CsvTaskData(file_url=file_url, column_name=payload.column)
             )
 
             response["file_url"] = file_url
             response["message"] = "Processando CSV..."
             await MongoService.save_task(task_data)
-            background_tasks.add_task(TaskService.process_csv, task_id, file_url, payload.column_name)
+            background_tasks.add_task(TaskService.process_csv, task_id, file_url, payload.column)
         else:
             task_data = TaskResult(
                 task_id=task_id,
