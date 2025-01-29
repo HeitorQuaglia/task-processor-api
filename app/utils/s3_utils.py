@@ -1,6 +1,6 @@
 import boto3
 import os
-from fastapi import UploadFile
+from fastapi import UploadFile, HTTPException
 from uuid import uuid4
 
 # Configurações do S3
@@ -35,3 +35,17 @@ def upload_to_s3(file: UploadFile) -> str:
     except Exception as e:
         print(f"Erro ao fazer upload para o S3: {e}")
         raise
+
+
+def download_from_s3(file_key: str):
+    """
+    Faz o download de um arquivo do S3 e retorna o conteúdo do arquivo.
+    :param file_key: A chave do arquivo no S3.
+    :return: O conteúdo do arquivo.
+    """
+    try:
+        file_obj = s3_client.get_object(Bucket=AWS_BUCKET_NAME, Key=file_key)
+        return file_obj['Body'].read()
+    except Exception as e:
+        print(f"Erro ao fazer download do arquivo {file_key} do S3: {e}")
+        raise HTTPException(status_code=500, detail="Erro ao fazer download do arquivo.")

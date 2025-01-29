@@ -31,8 +31,6 @@ services:
     image: mongo:latest
     container_name: mongo
     environment:
-      - MONGO_INITDB_ROOT_USERNAME=admin
-      - MONGO_INITDB_ROOT_PASSWORD=admin
       - MONGO_INITDB_DATABASE=db_app
     ports:
       - "27017:27017"
@@ -45,24 +43,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  rabbitmq:
-    image: "rabbitmq:management"
-    container_name: rabbitmq
-    ports:
-      - "5672:5672"
-      - "15672:15672"
-    environment:
-      - RABBITMQ_DEFAULT_USER=guest
-      - RABBITMQ_DEFAULT_PASS=guest
-    networks:
-      - app-network
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "ping" ]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
+    command: ["mongod", "--bind_ip_all", "--noauth"]
   localstack:
     image: localstack/localstack
     container_name: localstack
@@ -85,18 +66,6 @@ services:
       retries: 12
     networks:
       - app-network
-
-  redis:
-    image: redis:latest
-    ports:
-      - "6379:6379"
-    networks:
-      - app-network
-    healthcheck:
-        test: ["CMD", "redis-cli", "ping"]
-        interval: 10s
-        timeout: 5s
-        retries: 5
 
 volumes:
   mongo-data:
