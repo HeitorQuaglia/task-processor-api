@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Depends, BackgroundTasks, HTTPException
+from fastapi import APIRouter, UploadFile, File, Depends, BackgroundTasks, HTTPException, Request
 
 from app.services.mongo_service import MongoService
 from app.services.processor_service import ProcessorService
@@ -7,7 +7,8 @@ from app.models.process_data_input import ProcessDataInput
 router = APIRouter()
 
 @router.post("/process-data")
-async def process_data(background_tasks: BackgroundTasks, payload: ProcessDataInput = Depends(), file: UploadFile = File(None)):
+async def process_data(background_tasks: BackgroundTasks, payload: ProcessDataInput):
+    file = None
     return await ProcessorService.process_data(background_tasks, payload, file)
 
 @router.get("/results/{task_id}")

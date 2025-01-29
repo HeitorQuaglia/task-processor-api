@@ -6,11 +6,24 @@ logger = logging.getLogger(__name__)
 def validate_url(url):
     try:
         response = requests.head(url, allow_redirects=True, timeout=(3, 5))
+
         if response.status_code == 200:
-            logger.info(f"✅ URL válida: {url}")
-            return {"success": True, "status": "valid"}
+            result = "valid"
+            comment = f"O link {url} foi validado com sucesso."
+            status = "completed"
         else:
-            logger.warning(f"URL inválida: {url} - Status {response.status_code}")
-            return {"success": True, "status": "invalid" ,"reason": f"Status code {response.status_code}"}
+            result = "invalid"
+            comment = f"O link {url} é inválido. Status: {response.status_code}"
+            status = "completed"
+
+        return {
+            "result": result,
+            "status": status,
+            "comment": comment
+        }
     except requests.RequestException as e:
-        return {"success": False, "reason": str(e)}
+        return {
+            "result": "invalid",
+            "status": "error",
+            "comment": f"Erro ao validar a URL: {str(e)}"
+        }

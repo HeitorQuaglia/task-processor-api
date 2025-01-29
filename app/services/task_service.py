@@ -31,12 +31,6 @@ class TaskService:
         """
         result = validate_url(url)
 
-        result = {
-            "status": "completed" if result["success"] else "error",
-            "result": result["status"] if result["success"] else result["reason"],
-            "comments": "A URL é válida" if result["success"] and result["status"] == "valid" else result["reason"]
-        }
-
         await MongoService.update_task(task_id, result["status"] , result["result"], result["comment"])
 
     @staticmethod

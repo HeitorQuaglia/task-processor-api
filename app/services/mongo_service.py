@@ -32,10 +32,6 @@ class MongoService:
         if not task:
             raise ValueError(f"Tarefa com task_id {task_id} não encontrada.")
 
-        if task.status == status:
-            logger.info(f"A task {task_id} já está no status {status}. Nenhuma atualização necessária.")
-            return
-
         task.status = status
         task.result = result
         task.comment = comment

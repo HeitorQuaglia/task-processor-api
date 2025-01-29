@@ -1,9 +1,11 @@
 from pydantic import BaseModel, HttpUrl, Field, root_validator
-from typing import Optional
+from typing import Optional, Required
+
 
 class ProcessDataInput(BaseModel):
-    url: Optional[HttpUrl] = None
-    column_name: Optional[str] = None
+    url: str | None = None
+    column_name: str | None = None
+    # column_name: Optional[str] = None
     # url: Optional[HttpUrl] = Field(None, description="URL para validar. Deve ser um link válido.")
     # column_name: Optional[str] = Field(None, min_length=1, description="Nome da coluna a ser processada no CSV.")
 
