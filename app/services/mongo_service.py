@@ -30,12 +30,13 @@ class MongoService:
         :param comment: Comentário ou mensagem sobre o status
         """
         task = await MongoService._get_task_or_raise(task_id)  # Utilização de função extraída
-        task_updated = TaskResult(
-            **task.dict(),
-            status=status,
-            result=result,
-            comment=comment
-        )
+        task_dict = task.dict()
+        task_dict.update({
+            "status": status,
+            "result": result,
+            "comment": comment
+        })
+        task_updated = TaskResult(**task_dict)
         await TaskRepository.update_task(task_updated)
 
     @staticmethod
