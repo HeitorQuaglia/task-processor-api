@@ -1,14 +1,12 @@
+from http import HTTPStatus
 from typing import Optional
 from fastapi import APIRouter, BackgroundTasks, HTTPException, File, Form, UploadFile
 from app.models.process_data_input import ProcessDataInput
 from app.services.mongo_service import MongoService
 from app.services.processor_service import ProcessorService
+from app.utils.error_messages import ErrorMessages
 
 router = APIRouter()
-
-TASK_NOT_FOUND_MSG = "Task não encontrada"
-BAD_REQUEST_CODE = 400
-
 
 def format_payload(url: Optional[str], column: Optional[str], file: UploadFile) -> ProcessDataInput:
     """Função auxiliar para criar e validar o payload."""
@@ -16,14 +14,14 @@ def format_payload(url: Optional[str], column: Optional[str], file: UploadFile) 
         return ProcessDataInput(url=url, column=column, file=file)
     except ValueError as e:
         error_message = e.errors()[0]["msg"]
-        raise HTTPException(status_code=BAD_REQUEST_CODE, detail=error_message)
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=error_message)
 
 
 async def fetch_task_or_404(task_id: str):
     """Verifica se a tarefa existe, caso contrário, lança erro 404."""
     task = await MongoService.get_task(task_id)
     if not task:
-        raise HTTPException(status_code=404, detail=TASK_NOT_FOUND_MSG)
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail=ErrorMessages.TASK_NOT_FOUND_MSG)
     return task
 
 

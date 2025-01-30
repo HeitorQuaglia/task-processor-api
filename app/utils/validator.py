@@ -2,6 +2,8 @@ import requests
 from requests.exceptions import ConnectionError, Timeout, InvalidURL, RequestException, MissingSchema
 import logging
 
+from app.utils.error_messages import ErrorMessages
+
 logger = logging.getLogger(__name__)
 
 def validate_url(url):
@@ -26,14 +28,22 @@ def validate_url(url):
     except (ConnectionError, Timeout, InvalidURL, MissingSchema, RequestException) as e:
 
         error_messages = {
-            ConnectionError: f"Não foi possível estabelecer conexão com {url}. Verifique a URL ou tente novamente mais tarde.",
-            Timeout: f"A requisição para {url} expirou. O servidor não respondeu a tempo.",
-            InvalidURL: f"A URL fornecida ({url}) é mal formada. Verifique a URL.",
-            MissingSchema: f"A URL fornecida ({url}) está sem o esquema (como http ou https). Verifique a URL.",
-            RequestException: f"Erro ao validar a URL {url}: {str(e)}"
+            ConnectionError: lambda input_url: ErrorMessages.URL_CONNECTION_ERROR.format(url=input_url),
+            Timeout: lambda input_url: ErrorMessages.URL_TIMEOUT_ERROR.format(url=input_url),
+            InvalidURL: lambda input_url: ErrorMessages.URL_INVALID_FORMAT.format(url=input_url),
+            MissingSchema: lambda input_url: ErrorMessages.URL_MISSING_SCHEMA,
+            RequestException: lambda input_url, error_detail: ErrorMessages.URL_VALIDATION_GENERIC_ERROR.format(
+                url=input_url, error_message=str(error_detail)
+            )
         }
 
-        comment = error_messages.get(type(e), f"Erro desconhecido ao validar {url}: {str(e)}")
+        error_handler = error_messages.get(type(e), lambda input_url, error_detail:
+        f"Erro desconhecido ao validar {input_url}: {str(error_detail)}")
+
+        if callable(error_handler):
+            comment = error_handler(url, e) if error_handler.__code__.co_argcount > 1 else error_handler(url)
+        else:
+            comment = error_handler
 
         logger.error(f"{type(e).__name__}: {comment}")
 

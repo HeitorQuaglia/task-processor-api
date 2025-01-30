@@ -1,4 +1,5 @@
 import uuid
+from http import HTTPStatus
 from urllib.parse import urlparse
 
 from botocore.exceptions import ClientError
@@ -8,6 +9,7 @@ from app.models.process_data_input import ProcessDataInput
 from app.models.task_result import TaskResult, UrlTaskData, CsvTaskData
 from app.services.mongo_service import MongoService
 from app.services.task_service import TaskService
+from app.utils.error_messages import ErrorMessages
 from app.utils.s3_utils import upload_to_s3
 
 
@@ -24,16 +26,16 @@ class ProcessorService:
         if payload.file:
             try:
                 if not payload.file.content_type.startswith("text") and not payload.file.filename.endswith(".csv"):
-                    raise HTTPException(status_code=400, detail="Arquivo inválido. Apenas arquivos CSV são aceitos.")
+                    raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=ErrorMessages.INVALID_FILE_TYPE)
 
                 payload.file.file.read()
                 file_url = upload_to_s3(payload.file)
             except HTTPException:
                 raise
             except ClientError as e:
-                raise HTTPException(status_code=503, detail="Erro ao fazer upload do arquivo para S3.")
+                raise HTTPException(status_code=HTTPStatus.SERVICE_UNAVAILABLE, detail=ErrorMessages.S3_UPLOAD_ERROR)
             except Exception as e:
-                raise HTTPException(status_code=500, detail="Erro inesperado ao tentar processar o arquivo.")
+                raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=ErrorMessages.UNEXPECTED_FILE_PROCESSING_ERROR)
 
             task_data = TaskResult(
                 task_id=task_id,
@@ -51,18 +53,18 @@ class ProcessorService:
         else:
             try:
                 if not payload.url or not isinstance(payload.url, str):
-                    raise HTTPException(status_code=400, detail="URL fornecida é inválida.")
+                    raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=ErrorMessages.INVALID_URL)
 
                 result = urlparse(payload.url)
 
                 if not all([result.scheme, result.netloc]):
-                    raise HTTPException(status_code=400, detail="URL fornecida é inválida.")
+                    raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=ErrorMessages.INVALID_URL)
 
             except HTTPException:
                 raise
 
             except Exception:
-                raise HTTPException(status_code=500, detail="Erro ao validar o formato da URL.")
+                raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=ErrorMessages.URL_VALIDATION_ERROR)
 
             task_data = TaskResult(
                 task_id=task_id,

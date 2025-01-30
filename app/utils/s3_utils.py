@@ -1,7 +1,14 @@
+import logging
+from http import HTTPStatus
+
 import boto3
 import os
 from fastapi import UploadFile, HTTPException
 from uuid import uuid4
+
+from app.utils.error_messages import ErrorMessages
+
+logger = logging.getLogger(__name__)
 
 # Configurações do S3
 AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
@@ -32,7 +39,7 @@ def upload_to_s3(file: UploadFile) -> str:
         file_url = f"https://{AWS_BUCKET_NAME}.s3.{AWS_REGION}.amazonaws.com/{file_key}"
         return file_url
     except Exception as e:
-        print(f"Erro ao fazer upload para o S3: {e}")
+        logger.error(f"Erro ao fazer upload para o S3: {e}")
         raise
 
 
@@ -46,5 +53,5 @@ def download_from_s3(file_key: str):
         file_obj = s3_client.get_object(Bucket=AWS_BUCKET_NAME, Key=f"uploads/{file_key}")
         return file_obj['Body'].read()
     except Exception as e:
-        print(f"Erro ao fazer download do arquivo {file_key} do S3: {e}")
-        raise HTTPException(status_code=500, detail="Erro ao fazer download do arquivo.")
+        logger.error(f"Erro ao fazer download do arquivo {file_key} do S3: {e}")
+        raise HTTPException(status_code=HTTPStatus.INTERNAL_SERVER_ERROR, detail=ErrorMessages.FILE_DOWNLOAD_ERROR)
