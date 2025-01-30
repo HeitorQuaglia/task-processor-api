@@ -97,9 +97,14 @@ curl -X 'GET' 'http://localhost:8000/results/123e4567-e89b-12d3-a456-42661417400
 ```
 {
     "task_id": "123e4567-e89b-12d3-a456-426614174000",
+    "type": "csv",
     "status": "completed",
     "result": 5.0,
-    "comment": "Média calculada para a coluna '1': 5.0"
+    "comment": "Média calculada para a coluna '1': 5.0",
+    "task_metadata": {
+      "file_url": "https://csv-files-processor.s3.us-east-1.amazonaws.com/uploads/d81894e5-74dd-4a0f-8b09-ad406d26da1c.csv",
+      "column_name": "1"
+    }
 }
 ```
 📥 Response (exemplo para URL)
