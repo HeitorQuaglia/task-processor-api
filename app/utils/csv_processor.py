@@ -1,4 +1,5 @@
 import pandas as pd
+from pandas.errors import EmptyDataError
 import logging
 from io import BytesIO
 from app.utils.s3_utils import download_from_s3
@@ -20,6 +21,13 @@ def process_csv(file_url: str, column_index: int):
         csv_data = BytesIO(file_content)
         df = pd.read_csv(csv_data)
 
+        if df.shape[1] < 2 and df.empty:
+            return {
+                "status": "error",
+                "result": False,
+                "comment": "O arquivo não está em um formato de CSV válido."
+            }
+
         if df.empty:
             return {"status": "error", "result": False, "comment": "Arquivo CSV está vazio."}
 
@@ -32,19 +40,18 @@ def process_csv(file_url: str, column_index: int):
 
         if column_values.isna().all():
             return {"status": "error", "result": False,
-                    "comment": f"A coluna '{column_name}' contém apenas valores inválidos ou está vazia."}
+                    "comment": f"A coluna '{column_index}' contém valores inválidos ou está vazia."}
 
         average_value = round(column_values.mean(), 2)
 
         return {"status": "completed", "result": average_value,
                 "comment": f"Média calculada para a coluna de índice '{column_index}': {average_value}"}
 
-
     except FileNotFoundError:
         logger.error(f"Arquivo não encontrado: {file_url}")
         return {"status": "error", "result": False, "comment": "Arquivo não foi encontrado no S3."}
 
-    except pd.errors.ParserError:
+    except  (UnicodeDecodeError, pd.errors.ParserError, pd.errors.EmptyDataError):
         logger.error(f"Erro ao analisar o CSV: {file_key}")
         return {"status": "error", "result": False, "comment": "O arquivo não está em um formato de CSV válido."}
 
