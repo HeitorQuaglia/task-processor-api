@@ -15,6 +15,7 @@ AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
 AWS_BUCKET_NAME = os.getenv("AWS_BUCKET_NAME")
 AWS_REGION = os.getenv("AWS_REGION")
+AWS_URL = os.getenv("AWS_URL")
 
 # Criar cliente do S3
 s3_client = boto3.client(
@@ -22,7 +23,7 @@ s3_client = boto3.client(
     aws_access_key_id=AWS_ACCESS_KEY_ID,
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     region_name=AWS_REGION,
-    endpoint_url="http://localhost:4566" #TODO arrumar para funcionar com LocalStack e AWS
+    endpoint_url=AWS_URL
 )
 
 
