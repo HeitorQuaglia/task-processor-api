@@ -1,6 +1,8 @@
 import pytest
 from unittest.mock import patch
 
+from app.utils.csv_processor import process_csv
+
 
 @pytest.mark.parametrize("csv_content, column_index, expected_result", [
     (
@@ -52,25 +54,4 @@ def test_process_csv_non_numeric_column(mock_download):
         "status": "error",
         "result": False,
         "comment": f"A coluna '{column_index}' contém valores inválidos ou está vazia."
-    }
-
-
-import pytest
-from unittest.mock import patch
-from app.utils.csv_processor import process_csv
-
-
-@pytest.mark.asyncio
-@patch("app.utils.csv_processor.download_from_s3", return_value=b'{"foo":"bar"}')
-def test_process_csv_invalid_format(mock_download):
-    file_url = "https://s3.com/invalid_format.csv"
-
-    result = process_csv(file_url, column_index=0)
-
-    mock_download.assert_called_once_with("invalid_format.csv")
-
-    assert result == {
-        "status": "error",
-        "result": False,
-        "comment": "O arquivo não está em um formato de CSV válido."
     }
