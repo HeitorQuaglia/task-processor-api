@@ -18,7 +18,7 @@ Esta API permite validar URLs e processar arquivos CSV carregados pelo usuário.
  ┣ 📂 **services/** - Lógica de negócios da aplicação  
  ┣ 📂 **utils/** - Utilitários como validação de URL, processamento de CSV, etc.  
  ┣ 📜 **main.py** - Ponto de entrada da API FastAPI  
- ┣ 📜 **app.py** - Ponto de entrada da API FastAPI  
+ ┣ 📜 **app.py** - Configuração da API FastAPI  
 📂 **tests/** - Testes automatizados com pytest  
 📜 **requirements.txt** - Dependências do projeto  
 📜 **Dockerfile** - Configuração do Docker  
