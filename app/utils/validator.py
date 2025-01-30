@@ -8,7 +8,7 @@ def validate_url(url):
     try:
         response = requests.head(url, allow_redirects=True, timeout=(5, 10))
 
-        if response.status_code == 200:
+        if response.status_code < 400:
             result = "valid"
             comment = f"O link {url} foi validado com sucesso."
             status = "completed"
@@ -23,44 +23,22 @@ def validate_url(url):
             "comment": comment
         }
 
-    except ConnectionError as e:
-        # Caso a URL não exista ou tenha problemas de conexão
-        result = "invalid"
-        status = "error"
-        comment = f"Não foi possível estabelecer uma conexão com o servidor da URL: {url}. Verifique a URL ou tente novamente mais tarde."
-        logger.error(f"ConnectionError: {str(e)}")
+    except (ConnectionError, Timeout, InvalidURL, MissingSchema, RequestException) as e:
 
-    except Timeout as e:
-        # Caso a requisição tenha expirado (problema de tempo de resposta)
-        result = "invalid"
-        status = "error"
-        comment = f"A requisição para a URL {url} expirou. O servidor não respondeu a tempo."
-        logger.error(f"TimeoutError: {str(e)}")
+        error_messages = {
+            ConnectionError: f"Não foi possível estabelecer conexão com {url}. Verifique a URL ou tente novamente mais tarde.",
+            Timeout: f"A requisição para {url} expirou. O servidor não respondeu a tempo.",
+            InvalidURL: f"A URL fornecida ({url}) é mal formada. Verifique a URL.",
+            MissingSchema: f"A URL fornecida ({url}) está sem o esquema (como http ou https). Verifique a URL.",
+            RequestException: f"Erro ao validar a URL {url}: {str(e)}"
+        }
 
-    except InvalidURL as e:
-        # Caso a URL fornecida seja mal formada
-        result = "invalid"
-        status = "error"
-        comment = f"A URL fornecida ({url}) é mal formada. Verifique a URL."
-        logger.error(f"InvalidURL: {str(e)}")
+        comment = error_messages.get(type(e), f"Erro desconhecido ao validar {url}: {str(e)}")
 
-    except MissingSchema as e:
-        # Caso o esquema da URL não seja fornecido
-        result = "invalid"
-        status = "error"
-        comment = f"A URL fornecida ({url}) está sem o esquema (como http ou https). Verifique a URL."
-        logger.error(f"MissingSchema: {str(e)}")
+        logger.error(f"{type(e).__name__}: {comment}")
 
-    except RequestException as e:
-        print(type(e))
-        # Caso ocorra qualquer outro erro genérico durante a requisição
-        result = "invalid"
-        status = "error"
-        comment = f"Erro ao validar a URL {url}: {str(e)}"
-        logger.error(f"RequestException: {str(e)}")
-
-    return {
-        "result": result,
-        "status": status,
-        "comment": comment
-    }
+        return {
+            "result": "invalid",
+            "status": "error",
+            "comment": comment
+        }
