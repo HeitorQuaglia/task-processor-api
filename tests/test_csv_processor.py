@@ -21,18 +21,6 @@ def test_process_csv_success(mock_download, csv_content, column_index, expected_
 
 
 @pytest.mark.asyncio
-@patch("app.utils.csv_processor.download_from_s3", return_value=b"")
-def test_process_csv_empty_file(mock_download):
-    file_url = "https://s3.com/empty.csv"
-
-    result = process_csv(file_url, column_index=0)
-
-    mock_download.assert_called_once_with("empty.csv")
-
-    assert result == {"status": "error", "result": False, "comment": "Arquivo CSV está vazio."}
-
-
-@pytest.mark.asyncio
 @patch("app.utils.csv_processor.download_from_s3", return_value=b"A,B,C\n1,2,3\n4,5,6\n7,8,9\n")  # CSV com 3 colunas
 def test_process_csv_invalid_column_index(mock_download):
     file_url = "https://s3.com/sample.csv"

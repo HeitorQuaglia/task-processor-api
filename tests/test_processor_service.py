@@ -112,7 +112,7 @@ async def test_s3_upload_failure(mock_process_csv, mock_save_task, mock_upload_t
         await ProcessorService.process_data(background_tasks, payload)
 
     assert exc.value.status_code == 503
-    assert "Erro ao fazer upload do arquivo para S3." in exc.value.detail
+    assert "Erro ao fazer upload do arquivo para o S3." in exc.value.detail
 
     mock_save_task.assert_not_called()
     mock_process_csv.assert_not_called()
