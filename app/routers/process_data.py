@@ -35,7 +35,7 @@ async def process_data(
         file: UploadFile = File(None),
 ):
     payload = format_payload(url, column, file)
-    return await ProcessorService.process_data(background_tasks, payload, file)
+    return await ProcessorService.process_data(background_tasks, payload)
 
 
 @router.get("/results/{task_id}")
