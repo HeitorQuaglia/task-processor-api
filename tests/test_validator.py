@@ -42,6 +42,26 @@ def test_validate_url_connection_error(mock_head):
     assert result["status"] == "error"
     assert "Não foi possível estabelecer conexão" in result["comment"]
 
+@patch("requests.head", side_effect=requests.exceptions.InvalidURL)
+def test_validate_url_invalid_url(mock_head):
+    url = "htp:/malformed-url"
+    result = validate_url(url)
+
+    assert result["result"] == "invalid"
+    assert result["status"] == "error"
+    assert "é mal formada" in result["comment"]
+
+
+@patch("requests.head", side_effect=requests.exceptions.MissingSchema)
+def test_validate_url_missing_schema(mock_head):
+    url = "example.com"
+    result = validate_url(url)
+
+    assert result["result"] == "invalid"
+    assert result["status"] == "error"
+    assert "está sem o esquema" in result["comment"]
+
+
 @pytest.mark.asyncio
 @patch("requests.head", side_effect=requests.RequestException("Erro genérico"))
 def test_validate_url_generic_exception(mock_head):
