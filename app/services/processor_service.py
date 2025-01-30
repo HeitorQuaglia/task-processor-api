@@ -27,8 +27,7 @@ class ProcessorService:
             try:
                 if not payload.file.content_type.startswith("text") and not payload.file.filename.endswith(".csv"):
                     raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=ErrorMessages.INVALID_FILE_TYPE)
-
-                payload.file.file.read()
+                payload.file.file.seek(0)
                 file_url = upload_to_s3(payload.file)
             except HTTPException:
                 raise
