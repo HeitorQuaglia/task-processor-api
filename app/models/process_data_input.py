@@ -23,4 +23,7 @@ class ProcessDataInput(BaseModel):
         if file and not column:
             raise ValueError("É necessário fornecer uma coluna para o arquivo CSV.")
 
+        if column and not column.isdigit():
+            raise ValueError("'column' deve ser um numeral válido.")
+
         return values

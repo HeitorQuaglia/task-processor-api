@@ -43,7 +43,7 @@ def download_from_s3(file_key: str):
     :return: O conteúdo do arquivo.
     """
     try:
-        file_obj = s3_client.get_object(Bucket=AWS_BUCKET_NAME, Key=file_key)
+        file_obj = s3_client.get_object(Bucket=AWS_BUCKET_NAME, Key=f"uploads/{file_key}")
         return file_obj['Body'].read()
     except Exception as e:
         print(f"Erro ao fazer download do arquivo {file_key} do S3: {e}")

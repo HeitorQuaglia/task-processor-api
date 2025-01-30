@@ -34,10 +34,10 @@ class TaskService:
         await MongoService.update_task(task_id, result["status"] , result["result"], result["comment"])
 
     @staticmethod
-    async def process_csv(task_id: str, file_url: str, column_name: str):
+    async def process_csv(task_id: str, file_url: str, column_index: int):
         """
         Processa o CSV (valida a coluna) e atualiza o status no MongoDB.
         """
-        result = process_csv(file_url, column_name)
+        result = process_csv(file_url, column_index)
 
         await MongoService.update_task(task_id, result["status"], result["result"], result["comment"])
