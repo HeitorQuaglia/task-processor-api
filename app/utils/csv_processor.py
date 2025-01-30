@@ -1,5 +1,4 @@
 import pandas as pd
-from pandas.errors import EmptyDataError
 import logging
 from io import BytesIO
 from app.utils.s3_utils import download_from_s3
@@ -20,13 +19,6 @@ def process_csv(file_url: str, column_index: int):
 
         csv_data = BytesIO(file_content)
         df = pd.read_csv(csv_data)
-
-        if df.shape[1] < 2 and df.empty:
-            return {
-                "status": "error",
-                "result": False,
-                "comment": "O arquivo não está em um formato de CSV válido."
-            }
 
         if df.empty:
             return {"status": "error", "result": False, "comment": "Arquivo CSV está vazio."}
@@ -51,7 +43,7 @@ def process_csv(file_url: str, column_index: int):
         logger.error(f"Arquivo não encontrado: {file_url}")
         return {"status": "error", "result": False, "comment": "Arquivo não foi encontrado no S3."}
 
-    except  (UnicodeDecodeError, pd.errors.ParserError, pd.errors.EmptyDataError):
+    except  pd.errors.ParserError:
         logger.error(f"Erro ao analisar o CSV: {file_key}")
         return {"status": "error", "result": False, "comment": "O arquivo não está em um formato de CSV válido."}
 
