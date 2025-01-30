@@ -1,34 +1,45 @@
 from typing import Optional
 from fastapi import APIRouter, BackgroundTasks, HTTPException, File, Form, UploadFile
-
 from app.models.process_data_input import ProcessDataInput
 from app.services.mongo_service import MongoService
 from app.services.processor_service import ProcessorService
 
 router = APIRouter()
 
-@router.post("/process-data")
-async def process_data(
-    background_tasks: BackgroundTasks,
-    url: Optional[str] = Form(None),
-    column: Optional[str] = Form(None),
-    file: UploadFile = File(None),
-):
+TASK_NOT_FOUND_MSG = "Task não encontrada"
+BAD_REQUEST_CODE = 400
+
+
+def format_payload(url: Optional[str], column: Optional[str], file: UploadFile) -> ProcessDataInput:
+    """Função auxiliar para criar e validar o payload."""
     try:
-        payload = ProcessDataInput(url=url, column=column, file=file)
+        return ProcessDataInput(url=url, column=column, file=file)
     except ValueError as e:
         error_message = e.errors()[0]["msg"]
-        raise HTTPException(status_code=400, detail=error_message)
+        raise HTTPException(status_code=BAD_REQUEST_CODE, detail=error_message)
+
+
+async def fetch_task_or_404(task_id: str):
+    """Verifica se a tarefa existe, caso contrário, lança erro 404."""
+    task = await MongoService.get_task(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail=TASK_NOT_FOUND_MSG)
+    return task
+
+
+@router.post("/process-data")
+async def process_data(
+        background_tasks: BackgroundTasks,
+        url: Optional[str] = Form(None),
+        column: Optional[str] = Form(None),
+        file: UploadFile = File(None),
+):
+    payload = format_payload(url, column, file)
     return await ProcessorService.process_data(background_tasks, payload, file)
 
+
 @router.get("/results/{task_id}")
-async def get_task_result(task_id: str):
-    """
-    Consulta o status de uma tarefa pelo ID.
-    """
-    task = await MongoService.get_task(task_id)
-
-    if not task:
-        raise HTTPException(status_code=404, detail="Task não encontrada")
-
+async def fetch_task_status(task_id: str):
+    """Consulta o status de uma tarefa pelo ID."""
+    task = await fetch_task_or_404(task_id)
     return task

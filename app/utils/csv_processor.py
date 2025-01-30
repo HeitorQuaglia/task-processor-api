@@ -20,21 +20,37 @@ def process_csv(file_url: str, column_index: int):
         csv_data = BytesIO(file_content)
         df = pd.read_csv(csv_data)
 
+        if df.empty:
+            return {"status": "error", "result": False, "comment": "Arquivo CSV está vazio."}
+
         if column_index < 0 or column_index >= len(df.columns):
             return {"status": "error", "result": False,
                     "comment": f"O índice '{column_index}' está fora do intervalo válido."}
 
         column_name = df.columns[column_index]
-
-        if not pd.to_numeric(df[column_name], errors='coerce').notnull().all():
-            return {"status": "error", "result": False,
-                    "comment": f"Nem todos os valores na coluna de índice '{column_index}' são numéricos."}
-
         column_values = pd.to_numeric(df[column_name], errors='coerce')
-        average_value = column_values.mean()
+
+        if column_values.isna().all():
+            return {"status": "error", "result": False,
+                    "comment": f"A coluna '{column_name}' contém apenas valores inválidos ou está vazia."}
+
+        average_value = round(column_values.mean(), 2)
 
         return {"status": "completed", "result": average_value,
                 "comment": f"Média calculada para a coluna de índice '{column_index}': {average_value}"}
+
+
+    except FileNotFoundError:
+        logger.error(f"Arquivo não encontrado: {file_url}")
+        return {"status": "error", "result": False, "comment": "Arquivo não foi encontrado no S3."}
+
+    except pd.errors.ParserError:
+        logger.error(f"Erro ao analisar o CSV: {file_key}")
+        return {"status": "error", "result": False, "comment": "O arquivo não está em um formato de CSV válido."}
+
+    except ValueError as ve:
+        logger.error(f"Erro de valor: {ve}")
+        return {"status": "error", "result": False, "comment": "Erro nos valores do arquivo CSV."}
 
     except Exception as e:
         logger.error(f"Erro ao processar o CSV: {e}")

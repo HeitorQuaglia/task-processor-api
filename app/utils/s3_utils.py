@@ -15,7 +15,7 @@ s3_client = boto3.client(
     aws_access_key_id=AWS_ACCESS_KEY_ID,
     aws_secret_access_key=AWS_SECRET_ACCESS_KEY,
     region_name=AWS_REGION,
-    endpoint_url="http://localhost:4566" #TODO arrumar URL do Localstack
+    endpoint_url="http://localhost:4566" #TODO arrumar para funcionar com LocalStack e AWS
 )
 
 

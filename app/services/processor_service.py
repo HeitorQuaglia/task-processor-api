@@ -1,4 +1,8 @@
 import uuid
+from urllib.parse import urlparse
+
+from botocore.exceptions import ClientError
+
 from app.models.task_result import TaskResult, UrlTaskData, CsvTaskData
 from app.services.mongo_service import MongoService
 from app.services.task_service import TaskService
@@ -19,9 +23,15 @@ class ProcessorService:
 
         if file:
             try:
+                if not file.content_type.startswith("text") and not file.filename.endswith(".csv"):
+                    raise HTTPException(status_code=400, detail="Arquivo inválido. Apenas arquivos CSV são aceitos.")
+
+                file.file.read()
                 file_url = upload_to_s3(file)
+            except ClientError as e:
+                raise HTTPException(status_code=503, detail="Erro ao fazer upload do arquivo para S3.")
             except Exception as e:
-                raise HTTPException(status_code=503 , detail=str(e)) #TODO arrumar
+                raise HTTPException(status_code=500, detail="Erro inesperado ao tentar processar o arquivo.")
 
             task_data = TaskResult(
                 task_id=task_id,
@@ -37,6 +47,13 @@ class ProcessorService:
             await MongoService.save_task(task_data)
             background_tasks.add_task(TaskService.process_csv, task_id, file_url, int(payload.column))
         else:
+            try:
+                result = urlparse(payload.url)
+                if not all([result.scheme, result.netloc]):
+                    raise HTTPException(status_code=400, detail="URL fornecida é inválida.")
+            except Exception:
+                raise HTTPException(status_code=500, detail="Erro ao validar o formato da URL.")
+
             task_data = TaskResult(
                 task_id=task_id,
                 type="url",

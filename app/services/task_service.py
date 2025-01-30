@@ -20,9 +20,9 @@ class TaskService:
 
         try:
             await MongoService.update_task(task_id, **update_data)
-            logger.info(f"📌 Task {task_id} atualizada no MongoDB: {update_data}")
+            logger.info(f"Task {task_id} atualizada no MongoDB: {update_data}")
         except Exception as e:
-            logger.error(f"❌ Erro ao atualizar task {task_id}: {e}")
+            logger.error(f"Erro ao atualizar task {task_id}: {e}")
 
     @staticmethod
     async def validate_url(task_id: str, url: str):
