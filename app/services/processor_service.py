@@ -1,25 +1,20 @@
 import uuid
 from fastapi import BackgroundTasks
 from app.models.process_data_input import ProcessDataInput
-from app.services.mongo_service import MongoService
 from app.services.task_processor.processor import ProcessorProtocol
 from app.services.task_processor.csv_processor import CSVProcessor
+from app.services.task_processor.processor_response import ProcessorResponse
 from app.services.task_processor.url_processor import UrlProcessor
 
 
 class ProcessorService:
     @staticmethod
-    async def process_data(background_tasks: BackgroundTasks, payload: ProcessDataInput):
+    async def process_data(background_tasks: BackgroundTasks, payload: ProcessDataInput) -> ProcessorResponse:
         """
         Processa os dados recebidos, cria a tarefa no MongoDB e delega a execução ao TaskService.
         """
         processor = ProcessorService.get_processor_for_payload(payload)
-        processor.validate()
-        processor.process()
-        task_data = processor.create_task_data()
-        await MongoService.save_task(task_data)
-        processor.add_background_task(background_tasks)
-        return processor.response()
+        return await processor.run(background_tasks)
 
     @staticmethod
     def get_processor_for_payload(payload: ProcessDataInput) -> ProcessorProtocol:

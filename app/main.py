@@ -1,3 +1,8 @@
+"""
+main.py - Entry point for starting the web application via Uvicorn.
+Loads environment variables and starts the ASGI server.
+"""
+
 from dotenv import load_dotenv
 load_dotenv()
 

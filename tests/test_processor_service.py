@@ -25,9 +25,9 @@ async def test_process_valid_url(mock_validate_url, mock_save_task):
     for task in background_tasks.tasks:
         await task()
 
-    assert response["url"] == payload.url
-    assert response["message"] == "Processando validação de URL"
-    assert "task_id" in response
+    assert response.url == payload.url
+    assert response.message == "Processando validação de URL"
+    assert hasattr(response, "task_id")
 
     mock_validate_url.assert_called_once()
     mock_save_task.assert_awaited_once()
@@ -66,12 +66,12 @@ async def test_process_csv_success(mock_upload_to_s3, mock_process_csv, mock_sav
     for task in background_tasks.tasks:
         await task()
 
-    assert response["file_url"] == "https://s3.fake-bucket.com/sample.csv"
-    assert response["message"] == "Processando CSV..."
-    assert "task_id" in response
+    assert response.file_url == "https://s3.fake-bucket.com/sample.csv"
+    assert response.message == "Processando CSV..."
+    assert hasattr(response, "task_id")
 
     mock_upload_to_s3.assert_called_once()
-    mock_process_csv.assert_called_once_with(response["task_id"], response["file_url"], int(payload.column))
+    mock_process_csv.assert_called_once_with(response.task_id, response.file_url, int(payload.column))
     mock_save_task.assert_awaited_once()
 
 @pytest.mark.asyncio
