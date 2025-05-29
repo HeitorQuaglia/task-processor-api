@@ -1,4 +1,6 @@
 class ErrorMessages:
+    # Erros Internos
+    FILE_NOT_UPLOADED = "Arquivo não foi enviado ou não foi possível processá-lo."
     # Erros de Tasks
     TASK_NOT_FOUND_MSG = "Task não encontrada."
 
@@ -7,6 +9,7 @@ class ErrorMessages:
     S3_UPLOAD_ERROR = "Erro ao fazer upload do arquivo para o S3."
     UNEXPECTED_FILE_PROCESSING_ERROR = "Erro inesperado ao tentar processar o arquivo."
     FILE_DOWNLOAD_ERROR = "Erro ao fazer download do arquivo."
+    INVALID_COLUMN_INDEX = "Índice da coluna inválido."
 
     # Erros de URL
     INVALID_URL = "URL fornecida é inválida."

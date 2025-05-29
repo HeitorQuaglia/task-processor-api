@@ -1,6 +1,6 @@
 from fastapi import UploadFile
 from pydantic import BaseModel, root_validator
-from typing import Optional
+from typing import Optional, Any
 
 
 class ProcessDataInput(BaseModel):
@@ -8,8 +8,8 @@ class ProcessDataInput(BaseModel):
     column: Optional[str] = None
     file: Optional[UploadFile] = None
 
-    @root_validator(pre=True)
-    def validate_inputs(cls, values):
+    @root_validator(pre=True)  # type: ignore
+    def validate_inputs(cls, values: dict[str, Any]) -> dict[str, Any]:
         url = values.get("url")
         column = values.get("column")
         file = values.get("file")
